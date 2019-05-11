@@ -1,0 +1,5 @@
+Django==2.2.1
+djangorestframework==3.9.4
+channels==2.2.0
+google-cloud-translate==1.4.0
+channels_redis==2.4.0
