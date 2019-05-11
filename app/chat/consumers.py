@@ -1,10 +1,15 @@
-import json
-
 from channels.generic.websocket import AsyncWebsocketConsumer
+from google.cloud import translate
+
+import json
+import names
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    translate_client = translate.Client()
+
     async def connect(self):
+        self.username = names.get_first_name()
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
 
@@ -14,6 +19,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': f"{self.username} joined the chat.",
+                'username': self.username
+            }
+        )
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -25,20 +39,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
+        translated_message = self.translate_message(message)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': translated_message,
+                'username': self.username
             }
         )
 
     async def chat_message(self, event):
         message = event['message']
+        author = event['username']
 
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'username': author
         }))
 
-    # async def translate_message(self, even):
-    #     pass
+    def translate_message(self, message):
+        translation = self.translate_client.translate(
+            message,
+            target_language=self.room_name)
+
+        return translation['translatedText']
+

@@ -131,3 +131,9 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+SUPPORTED_LANGUAGES = [
+    ('ru', "Русский"),
+    ('en', "English"),
+    ('de', "Deutsch"),
+]
