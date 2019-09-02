@@ -1,6 +1,12 @@
-```
-docker run -p 6379:6379 -d redis:3.2
-```
+# How to use
+
+Install dependencies:
+
+`pipenv install` or `pip install -r requirements.txt`
+
+Run redis container:
+
+`docker run -p 6379:6379 -d redis:3.2`
 
 
 ## Google Cloud Translation
